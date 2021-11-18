@@ -23,30 +23,36 @@ namespace FunctionNotificationsApp
             ExecutionContext context)
         {
             log.LogInformation($"C# Http trigger function executed at: {DateTime.Now}");
-
-            CreateQueueIfNotExists(log, context);
-            var body = await new StreamReader(req.Body).ReadToEndAsync();
-            EmailRequestModel emailRequest = new EmailRequestModel();
-            emailRequest = JsonConvert.DeserializeObject<EmailRequestModel>(body);
-            string randomStr = Guid.NewGuid().ToString();
-            var serializeJsonObject = JsonConvert.SerializeObject(
+            try
+            {
+                CreateQueueIfNotExists(log, context);
+                var body = await new StreamReader(req.Body).ReadToEndAsync();
+                EmailRequestModel emailRequest = new EmailRequestModel();
+                emailRequest = JsonConvert.DeserializeObject<EmailRequestModel>(body);
+                string randomStr = Guid.NewGuid().ToString();
+                var serializeJsonObject = JsonConvert.SerializeObject(
                                              new
                                              {
                                                  ID = randomStr,
-                                                 Content = $"<html><body><h2> Hi guys,</br>" +
-                                                 $" {emailRequest.Body.Trim()}! </br>" +
-                                                 $"Best Regards,</br>" +
+                                                 Content = $"<html><body><h2> Hi guys,<br>" +
+                                                 $" {emailRequest?.Body.Trim()} <br>" +
+                                                 $"Best Regards,<br>" +
                                                  $"Daniel Cunha</h2></body></html>"
                                              });
 
-            CloudStorageAccount storageAccount = GetCloudStorageAccount(context);
-            CloudQueueClient cloudQueueClient = storageAccount.CreateCloudQueueClient();
-            CloudQueue cloudQueue = cloudQueueClient.GetQueueReference("email-queue");
-            var cloudQueueMessage = new CloudQueueMessage(serializeJsonObject);
+                CloudStorageAccount storageAccount = GetCloudStorageAccount(context);
+                CloudQueueClient cloudQueueClient = storageAccount.CreateCloudQueueClient();
+                CloudQueue cloudQueue = cloudQueueClient.GetQueueReference("email-queue");
+                var cloudQueueMessage = new CloudQueueMessage(serializeJsonObject);
 
-            await cloudQueue.AddMessageAsync(cloudQueueMessage);
-            log.LogInformation($"Storage Account has the email!");
-
+                await cloudQueue.AddMessageAsync(cloudQueueMessage);
+                log.LogInformation($"Storage Account has the email!");
+            }
+            catch (Exception ex)
+            {
+                log.LogInformation($"There was an error: " + ex);
+                throw new Exception($"There was an issue: {ex}");
+            }
             return new OkObjectResult("UploadEmailMessagesHttpTriggerFunction executed successfully!!");
         }
 
