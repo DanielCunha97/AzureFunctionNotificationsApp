@@ -25,9 +25,10 @@ namespace FunctionNotificationsApp
 
                 sendGridMessage = new SendGridMessage
                 {
-                    From = new EmailAddress("cunhadaniel3197@gmail.com", "AzureFuncApps"),
+                    From = new EmailAddress(Environment.GetEnvironmentVariable("From"), "AzureFuncApps"),
                 };
-                sendGridMessage.AddTo("diogocunha97@gmail.com");
+                
+                sendGridMessage.AddTo(Environment.GetEnvironmentVariable("To"));
                 sendGridMessage.SetSubject("Awesome Azure Function app");
                 sendGridMessage.AddContent("text/html", emailBody);
                 log.LogInformation($"Email Sent!!! With the body: {emailBody}");
