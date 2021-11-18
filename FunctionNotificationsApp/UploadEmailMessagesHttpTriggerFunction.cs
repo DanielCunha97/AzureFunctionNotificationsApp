@@ -24,25 +24,25 @@ namespace FunctionNotificationsApp
             log.LogInformation($"C# Http trigger function executed at: {DateTime.Now}");
 
             CreateQueueIfNotExists(log, context);
-
-            for (int i = 1; i <= 5; i++)
-            {
-                string randomStr = Guid.NewGuid().ToString();
-                var serializeJsonObject = JsonConvert.SerializeObject(
+            var body = await new StreamReader(req.Body).ReadToEndAsync();
+            string randomStr = Guid.NewGuid().ToString();
+            var serializeJsonObject = JsonConvert.SerializeObject(
                                              new
                                              {
                                                  ID = randomStr,
-                                                 Content = $"<html><body><h2> This is a Sample HTML content {i}! </h2></body></html>"
+                                                 Content = $"<html><body><h2> Hi guys," +
+                                                 $" {body.Trim()}! " +
+                                                 $"Best Regards," +
+                                                 $"Daniel Cunha</h2></body></html>"
                                              });
 
-                CloudStorageAccount storageAccount = GetCloudStorageAccount(context);
-                CloudQueueClient cloudQueueClient = storageAccount.CreateCloudQueueClient();
-                CloudQueue cloudQueue = cloudQueueClient.GetQueueReference("email-queue");
-                var cloudQueueMessage = new CloudQueueMessage(serializeJsonObject);
+            CloudStorageAccount storageAccount = GetCloudStorageAccount(context);
+            CloudQueueClient cloudQueueClient = storageAccount.CreateCloudQueueClient();
+            CloudQueue cloudQueue = cloudQueueClient.GetQueueReference("email-queue");
+            var cloudQueueMessage = new CloudQueueMessage(serializeJsonObject);
 
-                await cloudQueue.AddMessageAsync(cloudQueueMessage);
-                log.LogInformation($"Storage Account has the email!");
-            }
+            await cloudQueue.AddMessageAsync(cloudQueueMessage);
+            log.LogInformation($"Storage Account has the email!");
 
             return new OkObjectResult("UploadEmailMessagesHttpTriggerFunction executed successfully!!");
         }
