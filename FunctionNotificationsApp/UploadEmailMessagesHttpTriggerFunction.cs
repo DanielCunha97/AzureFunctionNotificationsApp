@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
+using FunctionNotificationsApp.Models;
 
 namespace FunctionNotificationsApp
 {
@@ -25,14 +26,16 @@ namespace FunctionNotificationsApp
 
             CreateQueueIfNotExists(log, context);
             var body = await new StreamReader(req.Body).ReadToEndAsync();
+            EmailRequestModel emailRequest = new EmailRequestModel();
+            emailRequest = JsonConvert.DeserializeObject<EmailRequestModel>(body);
             string randomStr = Guid.NewGuid().ToString();
             var serializeJsonObject = JsonConvert.SerializeObject(
                                              new
                                              {
                                                  ID = randomStr,
-                                                 Content = $"<html><body><h2> Hi guys," +
-                                                 $" {body.Trim()}! " +
-                                                 $"Best Regards," +
+                                                 Content = $"<html><body><h2> Hi guys,</br>" +
+                                                 $" {emailRequest.Body.Trim()}! </br>" +
+                                                 $"Best Regards,</br>" +
                                                  $"Daniel Cunha</h2></body></html>"
                                              });
 

@@ -25,7 +25,7 @@ namespace FunctionNotificationsApp
 
                 sendGridMessage = new SendGridMessage
                 {
-                    From = new EmailAddress(Environment.GetEnvironmentVariable("From"), "AzureFuncApps"),
+                    From = new EmailAddress(Environment.GetEnvironmentVariable("From"), "DanielAzureFuncApps"),
                 };
                 
                 sendGridMessage.AddTo(Environment.GetEnvironmentVariable("To"));
